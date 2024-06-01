@@ -1,14 +1,16 @@
 import { Container, VStack, Box, Text, Input, Button, HStack, Flex } from "@chakra-ui/react";
 import { useState } from "react";
 import { FaHome, FaPlusSquare } from "react-icons/fa";
+import { usePosts, useAddPost } from "../integrations/supabase";
 
 const Index = () => {
-  const [posts, setPosts] = useState([]);
+  const { data: posts, isLoading, error } = usePosts();
+  const addPostMutation = useAddPost();
   const [newPost, setNewPost] = useState("");
 
   const handlePostSubmit = () => {
     if (newPost.trim()) {
-      setPosts([{ content: newPost, id: Date.now() }, ...posts]);
+      addPostMutation.mutate({ name: "Anonymous", body: newPost, likes_count: 0 });
       setNewPost("");
     }
   };
@@ -35,8 +37,11 @@ const Index = () => {
           <Button mt={2} colorScheme="blue" onClick={handlePostSubmit}>Post</Button>
         </Box>
 
+        {isLoading && <Text>Loading...</Text>}
+        {error && <Text>Error loading posts</Text>}
+
         <VStack spacing={4} w="100%">
-          {posts.map((post) => (
+          {posts && posts.map((post) => (
             <Box key={post.id} w="100%" p={4} borderWidth="1px" borderRadius="md">
               <Text>{post.content}</Text>
             </Box>
