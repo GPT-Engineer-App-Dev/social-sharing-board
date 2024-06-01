@@ -13,52 +13,59 @@ export function SupabaseProvider({ children }) {
 
 const fromSupabase = async (query) => {
     const { data, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) {
+        console.error('Supabase error:', error.message);
+        throw new Error(error.message);
+    }
     return data;
 };
 
 /* supabase integration types
 
-// EXAMPLE TYPES SECTION
-// DO NOT USE TYPESCRIPT
-
-Foo // table: foos
+Posts // table: posts
     id: number
-    title: string
+    name: string
+    body: string
+    created_at: string
+    author_id: string
+    likes_count: number
 
-Bar // table: bars
+Reactions // table: reactions
     id: number
-    foo_id: number // foreign key to Foo
-	
+    post_id: number // foreign key to Posts
+    user_id: string
+    emoji: string
+
 */
 
-// Example hook for models
+// Hooks for models
 
-export const useFoo = ()=> useQuery({
-    queryKey: ['foo'],
-    queryFn: fromSupabase(supabase.from('foo')),
-})
-export const useAddFoo = () => {
+export const usePosts = () => useQuery({
+    queryKey: ['posts'],
+    queryFn: () => fromSupabase(supabase.from('posts').select('*')),
+});
+
+export const useAddPost = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newFoo)=> fromSupabase(supabase.from('foo').insert([{ title: newFoo.title }])),
-        onSuccess: ()=> {
-            queryClient.invalidateQueries('foo');
+        mutationFn: (newPost) => fromSupabase(supabase.from('posts').insert([newPost])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('posts');
         },
     });
 };
 
-export const useBar = ()=> useQuery({
-    queryKey: ['bar'],
-    queryFn: fromSupabase(supabase.from('bar')),
-})
-export const useAddBar = () => {
+export const useReactions = () => useQuery({
+    queryKey: ['reactions'],
+    queryFn: () => fromSupabase(supabase.from('reactions').select('*')),
+});
+
+export const useAddReaction = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newBar)=> fromSupabase(supabase.from('bar').insert([{ foo_id: newBar.foo_id }])),
-        onSuccess: ()=> {
-            queryClient.invalidateQueries('bar');
+        mutationFn: (newReaction) => fromSupabase(supabase.from('reactions').insert([newReaction])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('reactions');
         },
     });
 };
-
