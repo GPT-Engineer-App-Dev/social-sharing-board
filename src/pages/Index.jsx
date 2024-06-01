@@ -43,7 +43,7 @@ const Index = () => {
         <VStack spacing={4} w="100%">
           {posts && posts.map((post) => (
             <Box key={post.id} w="100%" p={4} borderWidth="1px" borderRadius="md">
-              <Text>{post.content}</Text>
+              <Text>{post.body}</Text>
             </Box>
           ))}
         </VStack>
